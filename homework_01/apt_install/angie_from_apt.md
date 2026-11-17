@@ -1,13 +1,13 @@
 # Установка Angie из пакетов с модулями Brotli и Zstandard
 
-## 1. Подготовка общих файлов
+## 1. Подготовка общих файлов для проекта
 
 ```bash
 mkdir -p ~/angie-lab/html
 cd ~/angie-lab
 ```
 
-## 2. Создание `modules.conf`
+## 2. Создание файла с указание модулей `modules.conf`
 
 ```bash
 cat > modules.conf <<'EOF'
@@ -19,7 +19,7 @@ load_module modules/ngx_http_zstd_static_module.so;
 EOF
 ```
 
-## 3. Создание `site.conf`
+## 3. Создание конфигурационного файла `site.conf`
 
 ```bash
 cat > site.conf <<'EOF'
@@ -53,7 +53,7 @@ server {
 EOF
 ```
 
-## 4. Создание тестового файла
+## 4. Создание тестового файла с наполнением
 
 ```bash
 awk 'BEGIN {
@@ -62,7 +62,7 @@ awk 'BEGIN {
 }' > html/test.txt
 ```
 
-## 5. Установка из пакетов
+## 5. Установка из пакетов из репозитория
 
 ```bash
 sudo apt update
@@ -103,7 +103,7 @@ sudo sed -i \
     /etc/angie/angie.conf
 ```
 
-## 7. Проверка конфигурации, запуск и добавление в автозапуск
+## 7. Проверка конфигурации, запуск и добавление angie в автозапуск
 
 ```bash
 sudo angie -t &&
@@ -113,6 +113,16 @@ sudo systemctl reload angie
 systemctl status angie --no-pager
 ```
 
-## 8. Тестовый адрес
+## 8. Тестовый адрес для проверки 
 
 <http://localhost:8081/test.txt>
+
+```
+результат в браузере: 
+Welcome to Angie!
+If you see this page, the Angie web server is successfully installed and working. Further configuration is required.
+
+For online documentation and support please refer to angie.software.
+
+Thank you for using Angie.
+```
