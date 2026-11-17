@@ -7,7 +7,7 @@ mkdir -p ~/angie-lab/html
 cd ~/angie-lab
 ```
 
-## 2. Создание файла с указание модулей `modules.conf`
+## 2. Создание файла модулей `modules.conf`
 
 ```bash
 cat > modules.conf <<'EOF'
@@ -62,7 +62,7 @@ awk 'BEGIN {
 }' > html/test.txt
 ```
 
-## 5. Установка из пакетов из репозитория
+## 5. Установка пакетов из репозитория
 
 ```bash
 sudo apt update
@@ -97,13 +97,12 @@ sudo install -m 0644 site.conf /etc/angie/http.d/compression-demo.conf
 sudo install -d -m 0755 /usr/share/angie/html
 sudo install -m 0644 html/test.txt /usr/share/angie/html/test.txt
 
-
 sudo sed -i \
     '1iinclude /etc/angie/compression-modules.conf;' \
     /etc/angie/angie.conf
 ```
 
-## 7. Проверка конфигурации, запуск и добавление angie в автозапуск
+## 7. Проверка конфигурации, запуск и автозапуск Angie
 
 ```bash
 sudo angie -t &&
@@ -113,16 +112,147 @@ sudo systemctl reload angie
 systemctl status angie --no-pager
 ```
 
-## 8. Тестовый адрес для проверки 
+## 8. Тестовый адрес
 
 <http://localhost:8081/test.txt>
 
-```
-результат в браузере: 
+Пример страницы приветствия из исходных заметок:
+
+```text
 Welcome to Angie!
 If you see this page, the Angie web server is successfully installed and working. Further configuration is required.
 
 For online documentation and support please refer to angie.software.
 
 Thank you for using Angie.
+```
+
+## 9. Проверка сжатия
+
+Задайте адрес в переменной:
+
+```bash
+URL=http://localhost:8081/test.txt
+```
+
+Пример содержимого тестового файла:
+
+```text
+Angie compression test: Brotli and Zstandard.
+Angie compression test: Brotli and Zstandard.
+Angie compression test: Brotli and Zstandard.
+Angie compression test: Brotli and Zstandard.
+Angie compression test: Brotli and Zstandard.
+Angie compression test: Brotli and Zstandard.
+Angie compression test: Brotli and Zstandard.
+Angie compression test: Brotli and Zstandard.
+```
+
+### Запросы через переменную `URL`
+
+```bash
+# Brotli
+curl -sS -D - -o /dev/null \
+    -H 'Accept-Encoding: br' "$URL"
+
+# Zstandard
+curl -sS -D - -o /dev/null \
+    -H 'Accept-Encoding: zstd' "$URL"
+```
+
+Примеры HTTP-ответов:
+
+```http
+HTTP/1.1 200 OK
+Server: Angie/1.12.4
+Date: Tue, 17 Nov 2026 18:45:31 GMT
+Content-Type: text/plain
+Last-Modified: Tue, 17 Nov 2026 17:08:04 GMT
+Transfer-Encoding: chunked
+Connection: keep-alive
+ETag: W/"6afc89f4-16760"
+Vary: Accept-Encoding
+Content-Encoding: br
+
+HTTP/1.1 200 OK
+Server: Angie/1.12.4
+Date: Tue, 17 Nov 2026 18:45:31 GMT
+Content-Type: text/plain
+Last-Modified: Tue, 17 Nov 2026 17:08:04 GMT
+Transfer-Encoding: chunked
+Connection: keep-alive
+ETag: W/"6afc89f4-16760"
+Vary: Accept-Encoding
+Content-Encoding: zstd
+```
+
+### Запросы с явным адресом
+
+**Brotli:**
+
+```bash
+curl -sS -D - -o /dev/null -H 'Accept-Encoding: br' http://localhost:8081/test.txt
+```
+
+Пример ответа:
+
+```http
+HTTP/1.1 200 OK
+Server: Angie/1.12.4
+Date: Tue, 17 Nov 2026 18:48:27 GMT
+Content-Type: text/plain
+Last-Modified: Tue, 17 Nov 2026 17:08:04 GMT
+Transfer-Encoding: chunked
+Connection: keep-alive
+ETag: W/"6afc89f4-16760"
+Vary: Accept-Encoding
+Content-Encoding: br
+```
+
+**Zstandard:**
+
+```bash
+curl -sS -D - -o /dev/null -H 'Accept-Encoding: zstd' http://localhost:8081/test.txt
+```
+
+Пример ответа:
+
+```http
+HTTP/1.1 200 OK
+Server: Angie/1.12.4
+Date: Tue, 17 Nov 2026 18:51:17 GMT
+Content-Type: text/plain
+Last-Modified: Tue, 17 Nov 2026 17:08:04 GMT
+Transfer-Encoding: chunked
+Connection: keep-alive
+ETag: W/"6afc89f4-16760"
+Vary: Accept-Encoding
+Content-Encoding: zstd
+```
+
+## 10. Дополнительные команды
+
+### Остановка и отключение автозапуска
+
+```bash
+sudo systemctl disable --now angie
+```
+
+Проверка:
+
+```bash
+systemctl is-active angie
+systemctl is-enabled angie
+```
+
+### Остановка службы
+
+```bash
+sudo systemctl stop angie
+```
+
+Проверка:
+
+```bash
+systemctl is-active angie
 ```

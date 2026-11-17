@@ -1,4 +1,7 @@
-## Устанавливаем ключи:
+# Установка Docker в Ubuntu
+
+## 1. Установка ключа репозитория
+
 ```bash
 sudo apt update
 sudo apt install -y ca-certificates curl
@@ -10,7 +13,8 @@ sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
 
 sudo chmod a+r /etc/apt/keyrings/docker.asc
 ```
-## Добавляем docker в apt :
+
+## 2. Добавление репозитория Docker в APT
 
 ```bash
 sudo tee /etc/apt/sources.list.d/docker.sources > /dev/null <<EOF
@@ -23,7 +27,8 @@ Signed-By: /etc/apt/keyrings/docker.asc
 EOF
 ```
 
-## Устанавливаем docker:
+## 3. Установка и запуск Docker
+
 ```bash
 sudo apt update
 
