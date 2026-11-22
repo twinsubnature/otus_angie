@@ -94,7 +94,14 @@ Content-Length: 20
 
 Тело ответа — `Migration test page`. Статус, адрес и содержимое совпали с проверкой до миграции. Заголовок `Server` подтвердил, что запрос обработал **Angie 1.12.4**.
 
-В этой работе Angie запускался вручную через `sudo angie`. Автозапуск не настраивали.
+В этой работе Angie запускался вручную через `sudo angie`. 
+Автозапуск настраивается:
+
+```bash
+sudo angie -t &&
+sudo systemctl disable --now nginx &&
+sudo systemctl enable --now angie
+``` 
 
 ## Откат к Nginx
 
@@ -107,3 +114,14 @@ curl -i --max-time 5 http://127.0.0.1:8082/
 ```
 
 После отката тот же URL снова должен вернуть `200 OK` с заголовком `Server: nginx`.
+
+для остановки в данном режиме:
+
+```bash
+sudo angie -s quit
+```
+Проверить, освободился ли тестовый порт:
+
+```bash
+sudo ss -ltnp 'sport = :8082'
+```
