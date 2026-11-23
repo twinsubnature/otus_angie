@@ -1,0 +1,51 @@
+name: nginx-angie-archive
+
+x-proxy: &proxy
+  depends_on:
+    backend:
+      condition: service_healthy
+  volumes:
+    - ./nginx:/opt/nginx-source:ro
+    - ./lab:/opt/migration:ro
+    - ./lab/site:/var/www/html:ro
+
+x-angie: &angie
+  <<: *proxy
+  image: docker.angie.software/angie:1.12.5-ubuntu
+  entrypoint: ["angie"]
+  command: ["-c", "/opt/migration/angie.conf", "-g", "daemon off;"]
+
+services:
+  backend:
+    image: python:3.14-slim
+    command: ["python", "-u", "/lab/backend.py"]
+    volumes:
+      - ./lab:/lab:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "from urllib.request import urlopen; [urlopen(f'http://127.0.0.1:{p}/', timeout=1).close() for p in range(9000, 9004)]"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+
+  nginx:
+    <<: *proxy
+    profiles: ["source"]
+    build:
+      context: ./lab
+      dockerfile: Dockerfile.nginx
+    entrypoint: ["nginx"]
+    command: ["-c", "/opt/migration/nginx.conf", "-g", "daemon off;"]
+    ports:
+      - "127.0.0.1:18082:80"
+
+  angie-check:
+    <<: *angie
+    profiles: ["preview"]
+    ports:
+      - "127.0.0.1:18083:80"
+
+  angie-live:
+    <<: *angie
+    profiles: ["live"]
+    ports:
+      - "127.0.0.1:18082:80"
